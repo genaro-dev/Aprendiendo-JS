@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini-curso de JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* VOICE: clara, cercana, de profe paciente; voseo rioplatense.
+   IDEA: un instrumento de taller: cada lección es un banco de pruebas con su consola.
+   PICTURE: una consola viva arriba de todo, donde ya se puede escribir JavaScript.
+   COLOUR and TYPE: aluminio, negro y un puntero naranja; Geist + Geist Mono.
+   LAYOUT: bandas a lo ancho; explicación, ejemplo ejecutable, tarea; la prueba al final. */
+:root{color-scheme:light dark;--bg:light-dark(#e9eaec,#141517);--panel:light-dark(#f8f8f9,#1c1e21);--ink:light-dark(#111214,#ececee);--muted:light-dark(#5b5f66,#9a9ea6);--line:light-dark(#cfd1d5,#2e3136);--acc:#ff4f00;--ok:light-dark(#0f7a3d,#4cd68a);--bad:light-dark(#c4201b,#ff7a72);--code:#0f1012;--codeink:#e8e8ea}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Geist,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(28px,4vw,64px) max(5vw,16px)}
+.wrap{max-width:1040px;margin:0 auto}
+pre,.scroll{overflow-x:auto}code{overflow-wrap:anywhere}html{scroll-padding-top:72px;scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}s
+h1{font-weight:300;font-size:clamp(34px,5.4vw,52px);line-height:1.05;margin:0 0 14px;text-wrap:balance;letter-spacing:-.02em}
+h2{font-weight:500;font-size:clamp(26px,3.4vw,34px);line-height:1.1;margin:0 0 6px;text-wrap:balance}
+h3{font-weight:500;font-size:19px;margin:30px 0 8px}
+p,li{max-width:70ch}
+.lead{font-size:17px;color:var(--muted);margin:0 0 26px}
+.num{font:500 15px Geist Mono,monospace;color:var(--acc)}
+code,pre,textarea,.out,.con{font-family:"Geist Mono",ui-monospace,monospace}
+:not(pre)>code{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.9em}
+pre{background:var(--code);color:var(--codeink);border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.55;margin:12px 0}
+/* consola principal */
+.con{background:var(--code);color:var(--codeink);border-radius:14px;box-shadow:0 1px 0 #fff2 inset,0 18px 40px -18px #0008;overflow:hidden}
+.con-top{display:flex;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid #ffffff14;font:13px Geist,sans-serif;color:#9a9ea6}
+.con-top i{width:10px;height:10px;border-radius:50%;background:#3a3d42}.con-top i:first-child{background:var(--acc)}
+.con-log{min-height:190px;max-height:300px;overflow:auto;padding:12px 16px;font-size:14.5px}
+.con-log div{padding:3px 0;border-bottom:1px solid #ffffff0d;white-space:pre-wrap;overflow-wrap:anywhere}
+.con-in{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid #ffffff14}
+.con-in span{color:var(--acc);font-weight:500}
+.con-in input{flex:1;background:transparent;border:0;color:var(--codeink);font:16px Geist Mono,monospace;outline:0;min-height:36px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{font:14px Geist Mono,monospace;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;min-height:40px}
+.chip:hover{border-color:var(--acc)}
+.r{color:#8fd3a8}.w{color:#ffd27a}.e{color:#ff8a80}.m{color:#8b8f96}
+/* nav */
+nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .scroll{display:flex;gap:4px;padding:8px max(5vw,16px);max-width:calc(1040px + 10vw);margin:0 auto}
+nav a{flex:none;color:var(--ink);text-decoration:none;font-size:14.5px;padding:9px 12px;border-radius:8px}
+nav a:hover{background:var(--panel)}nav a.fin{color:var(--acc);font-weight:500}
+@media(max-width:900px){nav{position:static}}
+section.band{border-bottom:1px solid var(--line)}
+section.alt{background:var(--panel)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px;margin:14px 0}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+section.alt .box{background:var(--bg)}
+.box b{display:block;margin-bottom:4px}
+.box p{margin:0;font-size:15px;color:var(--muted)}
+.tip{border-left:3px solid var(--acc);padding:4px 0 4px 14px;margin:16px 0;color:var(--ink)}
+/* editores */
+.ed{margin:12px 0 4px;border-radius:12px;overflow:hidden;background:var(--code);border:1px solid #000}
+.ed textarea{display:block;width:100%;resize:vertical;background:var(--code);color:var(--codeink);border:0;padding:14px 16px;font-size:14.5px;line-height:1.55;outline:0;tab-size:2;white-space:pre;overflow-x:auto}
+.ed textarea:focus-visible{box-shadow:inset 0 0 0 2px var(--acc)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;padding:8px 10px;background:#1a1c1f;border-top:1px solid #ffffff12;align-items:center}
+.btn{font:500 15px Geist,sans-serif;border-radius:8px;border:1px solid transparent;padding:9px 16px;min-height:44px;cursor:pointer}
+.btn.run{background:var(--acc);color:#fff}.btn.run:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:#c9ccd1;border-color:#ffffff26}
+.btn:focus-visible,.chip:focus-visible,.sbtn:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.bar small{color:#8b8f96;margin-left:auto;font-size:13px}
+.out{background:#08090a;color:var(--codeink);padding:10px 16px;font-size:14px;min-height:44px;border-top:1px solid #ffffff12}
+.out div{padding:2px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.out table{border-collapse:collapse;margin:4px 0;font-size:13px}.out td,.out th{border:1px solid #333;padding:3px 8px;text-align:left}
+/* escenario DOM */
+.stage{background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:16px;margin:14px 0;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+section.alt .stage{background:var(--bg)}
+.stage .lbl{width:100%;font-size:13px;color:var(--muted);margin:-4px 0 0}
+.sbtn{font:500 15px Geist,sans-serif;background:var(--ink);color:var(--bg);border:0;border-radius:8px;padding:10px 16px;min-height:44px;cursor:pointer}
+#mensaje{margin:0;flex:1 1 200px}
+.stage ul{margin:0;padding-left:20px;width:100%}.fruta{cursor:pointer}
+.tarj{border:2px solid var(--line);border-radius:12px;padding:12px 18px;background:var(--panel);min-width:200px;transition:background .25s,border-color .25s,color .25s}
+.tarj h4{margin:0;font-size:17px}.tarj p{margin:2px 0 0;font:500 22px Geist Mono,monospace}
+.tarj.destacada{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,var(--panel))}
+.tarj.oscura{background:#111214;color:#f2f2f2;border-color:#111214}
+/* tareas */
+.task{margin-top:30px;border:1px solid var(--line);border-radius:14px;padding:6px 18px 16px;background:var(--bg)}
+section:not(.alt) .task{background:var(--panel)}
+.task h3{margin-top:14px;display:flex;gap:10px;align-items:baseline}
+.task h3 span{font:500 13px Geist,sans-serif;background:var(--acc);color:#fff;border-radius:999px;padding:2px 10px}
+details{margin:8px 0}summary{cursor:pointer;font-weight:500;padding:8px 0;min-height:40px}
+/* prueba */
+.q{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0}
+.q .qh{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.q .tag{font-size:12.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 9px;white-space:nowrap}
+.q p.qt{margin:6px 0 10px;font-weight:500}
+.opts{display:grid;gap:6px}
+.opts label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--bg)}
+.opts label:hover{border-color:var(--acc)}
+.opts input{accent-color:var(--acc);width:18px;height:18px;margin-top:3px;flex:none}
+.vf .opts{grid-template-columns:repeat(2,minmax(0,1fr))}
+.q input[type=text]{width:100%;font:16px Geist Mono,monospace;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:44px}
+.q.ok{border-color:var(--ok)}.q.bad{border-color:var(--bad)}
+.fb{display:none;margin-top:10px;font-size:15px}.q.ok .fb,.q.bad .fb{display:block}
+.fb b{margin-right:6px}.q.ok .fb b{color:var(--ok)}.q.bad .fb b{color:var(--bad)}
+.opts label.right{border-color:var(--ok)}
+.score{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;background:var(--code);color:var(--codeink);border-radius:14px;padding:18px 22px;margin-top:20px}
+.score .big{font:500 clamp(34px,6vw,48px) Geist Mono,monospace;color:var(--acc);white-space:nowrap}
+.score p{margin:0;flex:1 1 260px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.btn.dark{background:var(--ink);color:var(--bg)}
+footer{padding:28px max(5vw,16px);color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+
+<header class="band">
+<div class="wrap">
+  <div class="num">Mini-curso · 6 lecciones · prueba final</div>
+  <h1>JavaScript en el navegador, desde cero</h1>
+  <p class="lead">Variables, funciones, cómo tocar la página con código, cómo pedir datos y cómo usar la consola. Cada lección tiene una explicación, ejemplos que podés ejecutar acá mismo y una tarea. Probá ya: escribí algo en la consola y apretá Enter.</p>
+  <div class="con" id="hero">
+    <div class="con-top"><i></i><i></i><i></i>&nbsp;Consola</div>
+    <div class="con-log" id="heroLog"><div class="m">// Esta es una consola como la del navegador. Escribí una expresión y apretá Enter.</div></div>
+    <div class="con-in"><span>&gt;</span><input id="heroIn" autocomplete="off" spellcheck="false" aria-label="Escribí JavaScript" placeholder='2 + 2'></div>
+  </div>
+  <div class="chips" id="chips"></div>
+</div>
+</header>
+
+<nav><div class="scroll">
+  <a href="#variables">1 · Variables</a><a href="#funciones">2 · Funciones e if</a><a href="#dom">3 · querySelector y eventos</a><a href="#texto-clases">4 · Texto y clases</a><a href="#fetch">5 · fetch y JSON</a><a href="#consola">6 · Consola</a><a class="fin" href="#prueba">Prueba final</a>
+</div></nav>
+
+<!-- 1 -->
+<section class="band" id="variables"><div class="wrap">
+  <div class="num">Lección 1</div>
+  <h2>Variables: <code>const</code> y <code>let</code></h2>
+  <p>Una variable es una caja con nombre donde guardás un valor para usarlo después. En JavaScript moderno se declaran con dos palabras:</p>
+  <div class="grid2">
+    <div class="box"><b><code>const</code> — constante</b><p>No se puede reasignar. Usala por defecto: casi todo lo que guardás no cambia de caja.</p></div>
+    <div class="box"><b><code>let</code> — variable</b><p>Se puede reasignar. Usala cuando el valor va a cambiar: contadores, totales, estados.</p></div>
+  </div>
+  <p>Existe también <code>var</code>, la forma vieja. Tiene reglas raras de alcance y hoy no se recomienda.</p>
+  <h3>Dos detalles importantes</h3>
+  <p><b>Alcance de bloque.</b> Una variable declarada dentro de <code>{ }</code> (un <code>if</code>, una función, un bucle) solo existe ahí adentro.</p>
+  <p><b><code>const</code> no congela objetos.</b> Impide cambiar <em>qué caja</em> es, pero si adentro hay un objeto o un array, sus contenidos sí se pueden modificar.</p>
+  <p>Para armar textos con variables usá <em>template literals</em>: comillas invertidas y <code>${ }</code>.</p>
+  <h3>Ejemplo — ejecutalo y modificalo</h3>
+  <div class="ed"><textarea>const nombre = "Ana";
+let edad = 30;
+console.log(nombre, edad);
+
+edad = edad + 1;               // let se puede reasignar
+console.log(`Cumplió años: ahora tiene ${edad}`);
+
+const persona = { nombre: "Ana", ciudad: "Córdoba" };
+persona.ciudad = "Rosario";    // esto SÍ se puede: cambia el contenido
+console.log(persona);
+
+if (true) {
+  let secreto = "solo existo acá adentro";
+}
+console.log(typeof secreto);   // "undefined": fuera del bloque no existe
+
+// Sacale las barras a la línea de abajo y ejecutá de nuevo:
+// nombre = "Beto";</textarea></div>
+  <div class="tip">Regla práctica: escribí siempre <code>const</code>. Si después necesitás reasignar, cambialo por <code>let</code>.</div>
+
+  <div class="task"><h3><span>Tarea 1</span> El carrito</h3>
+    <p>Declará <code>precio</code> (1200, no cambia) y <code>cantidad</code> (empieza en 1). Sumale 2 a la cantidad y mostrá en consola: <code>Total: $3600 (3 unidades)</code> usando un template literal.</p>
+    <div class="ed"><textarea>// Escribí tu código acá
+</textarea></div>
+    <details><summary>Ver pista</summary><p>¿Cuál de las dos cambia? Esa va con <code>let</code>. Para sumar: <code>cantidad = cantidad + 2</code> o <code>cantidad += 2</code>.</p></details>
+    <details><summary>Ver solución</summary><pre>const precio = 1200;
+let cantidad = 1;
+cantidad += 2;
+const total = precio * cantidad;
+console.log(`Total: $${total} (${cantidad} unidades)`);</pre></details>
+  </div>
+</div></section>
+
+<!-- 2 -->
+<section class="band alt" id="funciones"><div class="wrap">
+  <div class="num">Lección 2</div>
+  <h2>Funciones e <code>if</code></h2>
+  <p>Una <b>función</b> es un bloque de código con nombre que podés ejecutar cuantas veces quieras. Recibe datos (<em>parámetros</em>) y puede devolver un resultado con <code>return</code>. Cuando llega a <code>return</code>, la función termina.</p>
+<pre><code>// Declaración clásica
+function sumar(a, b) {
+  return a + b;
+}
+
+// Función flecha (arrow function): lo mismo, más corto
+const restar = (a, b) =&gt; a - b;
+
+sumar(2, 3);   // 5
+restar(9, 4);  // 5</code></pre>
+  <p>El <b><code>if</code></b> decide qué camino seguir según una condición que da <code>true</code> o <code>false</code>. Podés encadenar casos con <code>else if</code> y dejar un <code>else</code> final para “todo lo demás”.</p>
+  <div class="grid2">
+    <div class="box"><b>Comparar</b><p><code>===</code> igual · <code>!==</code> distinto · <code>&gt;</code> <code>&lt;</code> <code>&gt;=</code> <code>&lt;=</code></p></div>
+    <div class="box"><b>Combinar</b><p><code>&amp;&amp;</code> y · <code>||</code> o · <code>!</code> negación</p></div>
+  </div>
+  <div class="tip">Usá <code>===</code> y no <code>==</code>. El triple igual compara valor <em>y</em> tipo: <code>5 === "5"</code> es <code>false</code>, mientras que <code>5 == "5"</code> da <code>true</code> y trae sorpresas.</div>
+  <h3>Ejemplo</h3>
+  <div class="ed"><textarea>function clasificar(nota) {
+  if (nota >= 7) {
+    return "Aprobado";
+  } else if (nota >= 4) {
+    return "Recuperatorio";
+  } else {
+    return "Desaprobado";
+  }
+}
+
+console.log(clasificar(9));
+console.log(clasificar(5));
+console.log(clasificar(2));
+
+const puedeEntrar = (edad, tieneEntrada) => edad >= 18 && tieneEntrada;
+console.log(puedeEntrar(20, true));   // true
+console.log(puedeEntrar(16, true));   // false</textarea></div>
+
+  <div class="task"><h3><span>Tarea 2</span> Precio final</h3>
+    <p>Escribí una función <code>precioFinal(precio, esSocio)</code>: si es socio, hace 10% de descuento. Además, si el precio (ya con descuento) es menor a 5000, suma 800 de envío. Probala con <code>(10000, true)</code> → 9000, <code>(4000, false)</code> → 4800 y <code>(5000, true)</code> → 5300.</p>
+    <div class="ed"><textarea>function precioFinal(precio, esSocio) {
+  // tu código
+}
+
+console.log(precioFinal(10000, true));
+console.log(precioFinal(4000, false));
+console.log(precioFinal(5000, true));</textarea></div>
+    <details><summary>Ver pista</summary><p>Usá <code>let</code> para el precio que vas modificando. Primero el descuento (<code>* 0.9</code>), después el envío. Son dos <code>if</code> separados, no un <code>else if</code>, porque pueden pasar las dos cosas.</p></details>
+    <details><summary>Ver solución</summary><pre>function precioFinal(precio, esSocio) {
+  let total = precio;
+  if (esSocio) {
+    total = total * 0.9;
+  }
+  if (total &lt; 5000) {
+    total = total + 800;
+  }
+  return total;
+}</pre></details>
+  </div>
+</div></section>
+
+<!-- 3 -->
+<section class="band" id="dom"><div class="wrap">
+  <div class="num">Lección 3</div>
+  <h2><code>document.querySelector</code> y <code>addEventListener</code></h2>
+  <p>El navegador convierte el HTML en un árbol de objetos llamado <b>DOM</b>. Con JavaScript podés buscar cualquier elemento de ese árbol y reaccionar cuando el usuario hace algo.</p>
+  <h3>Buscar elementos</h3>
+  <p><code>document.querySelector(selector)</code> devuelve el <b>primer</b> elemento que coincide con un selector CSS, o <code>null</code> si no hay ninguno. <code>querySelectorAll</code> devuelve <b>todos</b>, en una lista (NodeList) que podés recorrer con <code>forEach</code>.</p>
+<pre><code>document.querySelector("#mensaje")   // por id      →  &lt;p id="mensaje"&gt;
+document.querySelector(".fruta")     // por clase   →  la primera .fruta
+document.querySelector("button")     // por etiqueta
+document.querySelectorAll(".fruta")  // todas las .fruta</code></pre>
+  <h3>Escuchar eventos</h3>
+  <p><code>elemento.addEventListener("evento", función)</code> le dice al navegador: “cuando pase esto, ejecutá esta función”. Los eventos más comunes: <code>click</code>, <code>input</code>, <code>submit</code>, <code>keydown</code>, <code>mouseover</code>. La función recibe un objeto <code>evento</code> con datos de lo que pasó, por ejemplo <code>evento.target</code>: el elemento que lo disparó.</p>
+  <div class="tip">Pasá la función <em>sin paréntesis</em>: <code>boton.addEventListener("click", saludar)</code>. Si escribís <code>saludar()</code>, se ejecuta en el momento y no al hacer clic.</div>
+  <h3>Ejemplo — este escenario es HTML real</h3>
+  <div class="stage" id="st3"><p class="lbl">Escenario de la lección 3</p><button id="btn-saludo" class="sbtn">Saludar</button><p id="mensaje">Todavía nadie saludó.</p><ul><li class="fruta">Manzana</li><li class="fruta">Pera</li><li class="fruta">Uva</li></ul></div>
+  <div class="ed" data-stage="st3"><textarea>const boton = document.querySelector("#btn-saludo");
+const mensaje = document.querySelector("#mensaje");
+console.log(boton);
+
+boton.addEventListener("click", function (evento) {
+  mensaje.textContent = "¡Hola! Hiciste clic.";
+  console.log("Clic en:", evento.target);
+});
+
+console.log("Listo. Ahora hacé clic en el botón Saludar de arriba.");</textarea></div>
+
+  <div class="task"><h3><span>Tarea 3</span> Frutas que hablan</h3>
+    <p>Seleccioná todas las <code>.fruta</code> del escenario, mostrá cuántas hay y hacé que, al hacer clic en cada una, la consola muestre <code>Elegiste: Pera</code> (con el nombre que corresponda).</p>
+    <div class="ed" data-stage="st3"><textarea>// Escribí tu código acá
+</textarea></div>
+    <details><summary>Ver pista</summary><p><code>querySelectorAll</code> te da la lista; con <code>.length</code> sabés cuántas son; con <code>forEach</code> le agregás un listener a cada una. El texto de un elemento está en <code>.textContent</code>.</p></details>
+    <details><summary>Ver solución</summary><pre>const frutas = document.querySelectorAll(".fruta");
+console.log("Hay", frutas.length, "frutas");
+
+frutas.forEach((fruta) =&gt; {
+  fruta.addEventListener("click", () =&gt; {
+    console.log(`Elegiste: ${fruta.textContent}`);
+  });
+});</pre></details>
+  </div>
+</div></section>
+
+<!-- 4 -->
+<section class="band alt" id="texto-clases"><div class="wrap">
+  <div class="num">Lección 4</div>
+  <h2>Cambiar texto y clases</h2>
+  <p>Una vez que tenés un elemento, podés cambiar lo que dice y cómo se ve.</p>
+  <div class="grid2">
+    <div class="box"><b><code>textContent</code></b><p>Lee o reemplaza el texto. Lo que pongas se muestra tal cual, nunca se interpreta como HTML. Es la opción segura.</p></div>
+    <div class="box"><b><code>innerHTML</code></b><p>Reemplaza el contenido interpretándolo como HTML. Útil para armar estructura, peligroso con texto que escribió un usuario (puede inyectar código).</p></div>
+  </div>
+  <p>Para el aspecto, lo ideal es no tocar estilos uno por uno sino <b>agregar o quitar clases</b> definidas en el CSS. Para eso está <code>classList</code>:</p>
+<pre><code>el.classList.add("activa")        // agrega
+el.classList.remove("activa")     // quita
+el.classList.toggle("activa")     // si la tiene la quita, si no la agrega
+el.classList.contains("activa")   // true o false</code></pre>
+  <h3>Ejemplo</h3>
+  <div class="stage" id="st4"><p class="lbl">Escenario de la lección 4 (el CSS ya tiene las clases <code>destacada</code> y <code>oscura</code>)</p><div id="tarjeta" class="tarj"><h4 id="titulo">Plan básico</h4><p id="precio">$ 0</p></div><button id="btn-modo" class="sbtn">Modo oscuro</button></div>
+  <div class="ed" data-stage="st4"><textarea>const tarjeta = document.querySelector("#tarjeta");
+const titulo = document.querySelector("#titulo");
+const precio = document.querySelector("#precio");
+
+titulo.textContent = "Plan Pro";
+precio.textContent = "$ 9.900";
+tarjeta.classList.add("destacada");
+
+console.log(tarjeta.classList.contains("destacada")); // true
+
+// Mirá la diferencia entre las dos propiedades:
+// titulo.innerHTML = "Plan <em>Pro</em>";   (se ve en cursiva)
+// titulo.textContent = "Plan <em>Pro</em>"; (se ven las etiquetas)</textarea></div>
+
+  <div class="task"><h3><span>Tarea 4</span> Interruptor de modo</h3>
+    <p>Hacé que el botón <code>#btn-modo</code> alterne la clase <code>oscura</code> en la tarjeta. Además, su texto tiene que decir <code>Modo claro</code> cuando la tarjeta está oscura y <code>Modo oscuro</code> cuando no.</p>
+    <div class="ed" data-stage="st4"><textarea>// Escribí tu código acá
+</textarea></div>
+    <details><summary>Ver pista</summary><p>Dentro del listener: primero <code>toggle</code>, después preguntá con <code>contains</code> y usá un <code>if</code> para decidir el texto.</p></details>
+    <details><summary>Ver solución</summary><pre>const tarjeta = document.querySelector("#tarjeta");
+const boton = document.querySelector("#btn-modo");
+
+boton.addEventListener("click", () =&gt; {
+  tarjeta.classList.toggle("oscura");
+  if (tarjeta.classList.contains("oscura")) {
+    boton.textContent = "Modo claro";
+  } else {
+    boton.textContent = "Modo oscuro";
+  }
+});</pre></details>
+  </div>
+</div></section>
+
+<!-- 5 -->
+<section class="band" id="fetch"><div class="wrap">
+  <div class="num">Lección 5</div>
+  <h2><code>fetch</code> y JSON (concepto)</h2>
+  <p>Muchas páginas piden datos a un servidor sin recargarse: el clima, una lista de productos, tus mensajes. Para eso se usa <code>fetch</code>. Y casi siempre esos datos viajan en formato <b>JSON</b>.</p>
+  <h3>JSON</h3>
+  <p>JSON (<em>JavaScript Object Notation</em>) es <b>texto</b> con forma de objeto. Las claves van siempre entre comillas dobles; no admite comentarios ni funciones.</p>
+<pre><code>{ "nombre": "Ana", "edad": 30, "cursos": ["JS", "CSS"], "activo": true }</code></pre>
+  <div class="grid2">
+    <div class="box"><b><code>JSON.parse(texto)</code></b><p>Texto JSON → objeto de JavaScript.</p></div>
+    <div class="box"><b><code>JSON.stringify(objeto)</code></b><p>Objeto de JavaScript → texto JSON, listo para enviar o guardar.</p></div>
+  </div>
+  <h3>Cómo funciona <code>fetch</code></h3>
+  <p>Pedir algo por internet tarda. Por eso <code>fetch</code> no te da los datos al instante: devuelve una <b>Promise</b>, una promesa de que la respuesta va a llegar. Con <code>await</code> (dentro de una función <code>async</code>) esperás a que se cumpla. El proceso tiene dos pasos:</p>
+  <ol>
+    <li><code>await fetch(url)</code> → llega la <b>respuesta</b> (estado, encabezados…).</li>
+    <li><code>await respuesta.json()</code> → se lee el cuerpo y se convierte en objeto.</li>
+  </ol>
+  <div class="tip">Un 404 o un 500 <em>no</em> hace fallar a <code>fetch</code>: la promesa solo se rechaza si no hay conexión. Para saber si salió bien, mirá <code>respuesta.ok</code> (true si el estado está entre 200 y 299).</div>
+  <p>Existe otra forma de escribirlo, con <code>.then()</code>, que vas a ver mucho en internet. Hace exactamente lo mismo:</p>
+<pre><code>fetch("/api/usuario/1")
+  .then((respuesta) =&gt; respuesta.json())
+  .then((datos) =&gt; console.log(datos))
+  .catch((error) =&gt; console.error("Falló:", error));</code></pre>
+  <h3>Ejemplo</h3>
+  <p class="lead" style="margin:0;font-size:15px">En esta página <code>fetch</code> está simulado: responde a <code>/api/usuario/1</code> y <code>/api/productos</code>, y a cualquier otra dirección con un 404. En una página real funciona igual, pero contra un servidor de verdad.</p>
+  <div class="ed"><textarea>// 1) JSON ida y vuelta
+const texto = '{"nombre":"Ana","edad":30}';
+const obj = JSON.parse(texto);
+console.log(obj.edad + 1);                    // 31: ya es un número
+console.log(JSON.stringify({ ok: true, lista: [1, 2] }));
+
+// 2) Pedir datos
+async function cargarUsuario() {
+  const respuesta = await fetch("/api/usuario/1");
+  console.log("Estado:", respuesta.status, "ok:", respuesta.ok);
+  const datos = await respuesta.json();
+  console.log(datos);
+  console.log(`${datos.nombre} vive en ${datos.ciudad}`);
+}
+
+cargarUsuario();
+console.log("Esto se imprime ANTES que el usuario: fetch no bloquea.");</textarea></div>
+
+  <div class="task"><h3><span>Tarea 5</span> Lista de productos</h3>
+    <p>Pedí <code>/api/productos</code>. Si la respuesta no es <code>ok</code>, mostrá un <code>console.error</code>. Si es ok, mostralos con <code>console.table</code> y después el precio total. Bonus: envolvelo en <code>try/catch</code> y probá cambiar la URL por <code>/api/nada</code>.</p>
+    <div class="ed"><textarea>async function cargarProductos() {
+  // tu código
+}
+
+cargarProductos();</textarea></div>
+    <details><summary>Ver pista</summary><p>Los productos llegan como un array de objetos con <code>nombre</code> y <code>precio</code>. Para el total podés recorrerlo con <code>forEach</code> sumando a una variable <code>let</code>.</p></details>
+    <details><summary>Ver solución</summary><pre>async function cargarProductos() {
+  try {
+    const respuesta = await fetch("/api/productos");
+    if (!respuesta.ok) {
+      console.error("Error del servidor:", respuesta.status);
+      return;
+    }
+    const productos = await respuesta.json();
+    console.table(productos);
+
+    let total = 0;
+    productos.forEach((p) =&gt; { total += p.precio; });
+    console.log(`Total: $${total}`);
+  } catch (error) {
+    console.error("Sin conexión:", error.message);
+  }
+}</pre></details>
+  </div>
+</div></section>
+
+<!-- 6 -->
+<section class="band alt" id="consola"><div class="wrap">
+  <div class="num">Lección 6</div>
+  <h2>La consola del navegador</h2>
+  <p>Todos los navegadores traen herramientas para desarrolladores. La pestaña <b>Console</b> es donde ves los mensajes de tu código, los errores y donde podés escribir JavaScript directo sobre la página abierta, como en la consola de arriba de todo.</p>
+  <div class="grid2">
+    <div class="box"><b>Abrirla</b><p><code>F12</code> o <code>Ctrl+Shift+J</code> en Windows/Linux · <code>Cmd+Option+J</code> en Mac (Chrome). También: clic derecho → Inspeccionar → Console.</p></div>
+    <div class="box"><b>Usarla</b><p>Escribís una expresión, Enter, y ves el resultado. Con la flecha ↑ recuperás lo último que escribiste.</p></div>
+  </div>
+  <h3>Los métodos que más vas a usar</h3>
+<pre><code>console.log("info general", variable)
+console.warn("advertencia")      // amarillo
+console.error("algo salió mal")  // rojo
+console.table(arrayDeObjetos)    // lo muestra como tabla</code></pre>
+  <h3>Leer un error</h3>
+  <p>Un error en rojo te dice <b>qué tipo</b> de error es, <b>un mensaje</b> y <b>en qué archivo y línea</b> ocurrió. Los tres más comunes al empezar:</p>
+  <div class="grid2">
+    <div class="box"><b>ReferenceError</b><p>Usaste una variable que no existe: un typo o algo fuera de su bloque.</p></div>
+    <div class="box"><b>TypeError</b><p>Hiciste algo que ese valor no admite: reasignar un <code>const</code>, o usar <code>.textContent</code> sobre <code>null</code> porque el <code>querySelector</code> no encontró nada.</p></div>
+    <div class="box"><b>SyntaxError</b><p>El código está mal escrito: falta un paréntesis, una llave o una comilla.</p></div>
+  </div>
+  <h3>Ejemplo</h3>
+  <div class="ed"><textarea>const alumnos = [
+  { nombre: "Luz", nota: 8 },
+  { nombre: "Tomás", nota: 5 },
+  { nombre: "Ema", nota: 3 }
+];
+console.log("Cantidad de alumnos:", alumnos.length);
+console.table(alumnos);
+console.warn("Hay notas por debajo de 4");
+console.error("Esto es un error de ejemplo");
+
+const titulo = document.querySelector("#no-existe");
+console.log(titulo);              // null: no lo encontró
+titulo.textContent = "Hola";      // TypeError: leé el mensaje abajo</textarea></div>
+
+  <div class="task"><h3><span>Tarea 6</span> Cazá los errores</h3>
+    <p>Este código tiene tres problemas. Ejecutalo, leé el error, arreglalo y volvé a ejecutar hasta que imprima <code>Hola, Sol. Tenés 3 mensajes.</code></p>
+    <div class="ed"><textarea>const nombre = "Luz";
+nombre = "Sol";
+let mensajes = 3;
+console.log(`Hola, ${nombre}. Tenés ${mensaje} mensajes.`;</textarea></div>
+    <details><summary>Ver pista</summary><p>Uno es de sintaxis (se detecta antes de ejecutar), otro de tipo y otro de referencia. El orden en que aparecen te dice cuál arreglar primero.</p></details>
+    <details><summary>Ver solución</summary><pre>let nombre = "Luz";        // TypeError: un const no se reasigna
+nombre = "Sol";
+let mensajes = 3;
+console.log(`Hola, ${nombre}. Tenés ${mensajes} mensajes.`); // faltaba ")" y la "s"</pre></details>
+  </div>
+</div></section>
+
+<!-- PRUEBA -->
+<section class="band" id="prueba"><div class="wrap">
+  <div class="num">Evaluación</div>
+  <h2>Prueba final</h2>
+  <p class="lead">21 preguntas: opción múltiple, verdadero o falso y respuesta corta. Contestá todo y apretá “Corregir”: vas a ver tu puntaje y la explicación de cada una.</p>
+  <form id="quiz"></form>
+  <div class="actions"><button class="btn run" id="corregir" type="button">Corregir</button><button class="btn dark" id="reiniciar" type="button">Empezar de nuevo</button></div>
+  <div id="resultado"></div>
+</div></section>
+
+<footer><div class="wrap">Los ejemplos se ejecutan en esta misma página. <code>fetch</code> está simulado porque la página no puede conectarse a otros servidores; <code>alert()</code> tampoco está disponible acá, por eso todo sale por consola.</div></footer>
+
+<script>
+{
+const AsyncFn = Object.getPrototypeOf(async function(){}).constructor;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const fmt = (v, top = true) => {
+  if (typeof v === 'string') return top ? v : JSON.stringify(v);
+  if (v === undefined) return 'undefined';
+  if (typeof v === 'function') return 'ƒ ' + (v.name || 'anónima') + '()';
+  if (v instanceof Element) return '<' + v.tagName.toLowerCase() + (v.id ? '#' + v.id : '') + [...v.classList].map(c => '.' + c).join('') + '>';
+  if (v instanceof NodeList) return 'NodeList(' + v.length + ') [' + [...v].map(x => fmt(x, false)).join(', ') + ']';
+  if (v instanceof Error) return v.name + ': ' + v.message;
+  if (v && typeof v === 'object') { try { return JSON.stringify(v, null, 1).replace(/\n\s*/g, ' '); } catch { return String(v); } }
+  return String(v);
+};
+
+const mkConsole = out => {
+  const line = (cls, args) => { const d = document.createElement('div'); d.className = cls; d.textContent = args.map(a => fmt(a)).join(' '); out.appendChild(d); out.scrollTop = out.scrollHeight; };
+  return {
+    log: (...a) => line('', a), info: (...a) => line('', a),
+    warn: (...a) => line('w', ['⚠', ...a]), error: (...a) => line('e', ['✖', ...a]),
+    table: data => {
+      if (!data || typeof data !== 'object') return line('', [data]);
+      const rows = Array.isArray(data) ? data : Object.values(data);
+      const keys = [...new Set(rows.flatMap(r => r && typeof r === 'object' ? Object.keys(r) : []))];
+      const t = document.createElement('table');
+      t.innerHTML = '<tr><th>(índice)</th>' + keys.map(k => '<th>' + esc(k) + '</th>').join('') + '</tr>' +
+        rows.map((r, i) => '<tr><td>' + i + '</td>' + keys.map(k => '<td>' + esc(fmt(r[k], false)) + '</td>').join('') + '</tr>').join('');
+      out.appendChild(t);
+    }
+  };
+};
+
+const DB = {
+  '/api/usuario/1': { id: 1, nombre: 'Ana', ciudad: 'Rosario', cursos: ['JS', 'CSS'] },
+  '/api/productos': [{ nombre: 'Mate', precio: 4500 }, { nombre: 'Bombilla', precio: 2800 }, { nombre: 'Yerba 1kg', precio: 5200 }]
+};
+const mockFetch = url => new Promise(res => setTimeout(() => {
+  const hit = Object.prototype.hasOwnProperty.call(DB, url);
+  const body = hit ? JSON.stringify(DB[url]) : JSON.stringify({ error: 'No encontrado' });
+  res({ ok: hit, status: hit ? 200 : 404, url, json: () => Promise.resolve(JSON.parse(body)), text: () => Promise.resolve(body) });
+}, 450));
+
+/* editores */
+document.querySelectorAll('.stage').forEach(s => s.dataset.orig = s.innerHTML);
+document.querySelectorAll('.ed').forEach(ed => {
+  const ta = ed.querySelector('textarea');
+  const orig = ta.value;
+  ta.spellcheck = false;
+  ta.setAttribute('aria-label', 'Editor de código');
+  const fit = () => { ta.rows = Math.max(3, ta.value.split('\n').length + 1); };
+  fit();
+  ta.addEventListener('input', fit);
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); const s = ta.selectionStart; ta.setRangeText('  ', s, ta.selectionEnd, 'end'); }
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); }
+  });
+  const bar = document.createElement('div'); bar.className = 'bar';
+  bar.innerHTML = '<button class="btn run" type="button">▶ Ejecutar</button><button class="btn ghost" type="button">Restaurar</button><small>Ctrl + Enter</small>';
+  const out = document.createElement('div'); out.className = 'out'; out.setAttribute('aria-live', 'polite');
+  out.innerHTML = '<div class="m">La salida de console.log aparece acá.</div>';
+  ed.append(bar, out);
+  const stage = ed.dataset.stage ? document.getElementById(ed.dataset.stage) : null;
+  async function run() {
+    out.innerHTML = '';
+    if (stage) stage.innerHTML = stage.dataset.orig;
+    const c = mkConsole(out);
+    try { await new AsyncFn('console', 'fetch', ta.value)(c, mockFetch); }
+    catch (err) { c.error(err.name + ': ' + err.message); }
+    if (!out.children.length) out.innerHTML = '<div class="m">(sin salida: ¿te faltó un console.log?)</div>';
+  }
+  const [bRun, bReset] = bar.querySelectorAll('button');
+  bRun.addEventListener('click', run);
+  bReset.addEventListener('click', () => { ta.value = orig; fit(); out.innerHTML = '<div class="m">Código restaurado.</div>'; if (stage) stage.innerHTML = stage.dataset.orig; });
+});
+
+/* consola principal */
+const log = document.getElementById('heroLog'), inp = document.getElementById('heroIn');
+const hc = mkConsole(log);
+const hist = []; let hi = 0;
+const evalLine = src => {
+  if (!src.trim()) return;
+  hist.push(src); hi = hist.length;
+  const d = document.createElement('div'); d.className = 'm'; d.textContent = '> ' + src; log.appendChild(d);
+  let val, ok = true;
+  try { val = new Function('console', 'return (' + src + '\n)')(hc); }
+  catch (e1) {
+    if (e1 instanceof SyntaxError) { try { val = new Function('console', src)(hc); } catch (e2) { ok = false; val = e2; } }
+    else { ok = false; val = e1; }
+  }
+  const r = document.createElement('div'); r.className = ok ? 'r' : 'e';
+  r.textContent = ok ? '← ' + fmt(val, false) : '✖ ' + fmt(val);
+  log.appendChild(r); log.scrollTop = log.scrollHeight;
+};
+inp.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { evalLine(inp.value); inp.value = ''; }
+  else if (e.key === 'ArrowUp' && hi > 0) { e.preventDefault(); inp.value = hist[--hi]; }
+  else if (e.key === 'ArrowDown') { e.preventDefault(); hi = Math.min(hist.length, hi + 1); inp.value = hist[hi] || ''; }
+});
+const chips = ['2 + 2', '"hola".toUpperCase()', 'typeof 42', '[3, 1, 2].sort()', '5 === "5"', 'document.title', 'JSON.stringify({ a: 1 })'];
+const chipBox = document.getElementById('chips');
+chipBox.innerHTML = chips.map(c => '<button class="chip" type="button">' + esc(c) + '</button>').join('');
+chipBox.querySelectorAll('.chip').forEach((b, i) => b.addEventListener('click', () => { evalLine(chips[i]); inp.focus(); }));
+
+/* prueba */
+const Q = [
+  { t: 'mc', q: '¿Qué pasa al ejecutar <code>const x = 5; x = 6;</code>?', o: ['x pasa a valer 6', 'TypeError: no se puede reasignar una constante', 'x sigue valiendo 5 sin ningún aviso', 'No pasa nada: const y let son iguales'], a: 1, e: 'Una variable declarada con const no se puede reasignar; intentarlo lanza un TypeError.' },
+  { t: 'mc', q: '¿Qué devuelve el primer elemento con la clase <code>card</code>?', o: ['document.querySelector("#card")', 'document.querySelector("card")', 'document.querySelector(".card")', 'document.querySelectorAll("#card")'], a: 2, e: 'El punto indica clase, el numeral indica id, y sin prefijo busca una etiqueta &lt;card&gt;.' },
+  { t: 'mc', q: '¿Qué imprime este código?<pre>let a = 2;\nif (a > 3) {\n  console.log("grande");\n} else if (a === 2) {\n  console.log("dos");\n} else {\n  console.log("otro");\n}</pre>', o: ['grande', 'dos', 'otro', 'dos y otro'], a: 1, e: 'a > 3 es false, a === 2 es true: entra en el else if y no evalúa el resto.' },
+  { t: 'mc', q: '¿Qué devuelve <code>fetch(url)</code> de inmediato?', o: ['Los datos ya convertidos en objeto', 'Un string con el JSON', 'Una Promise que se resuelve con la respuesta', 'El elemento HTML de la página pedida'], a: 2, e: 'fetch es asíncrono: devuelve una Promise. Con await (o .then) obtenés la respuesta.' },
+  { t: 'mc', q: '¿Qué método agrega una clase si no está y la quita si está?', o: ['classList.switch()', 'classList.toggle()', 'className.toggle()', 'classList.change()'], a: 1, e: 'toggle alterna la clase. add y remove hacen solo una de las dos cosas.' },
+  { t: 'mc', q: '¿Qué imprime?<pre>const doble = (n) => n * 2;\nconsole.log(doble(4) + 1);</pre>', o: ['8', '9', '10', '"81"'], a: 1, e: 'doble(4) devuelve 8 y se le suma 1: 9.' },
+  { t: 'mc', q: '¿Qué hace <code>await respuesta.json()</code>?', o: ['Convierte un objeto en texto JSON', 'Lee el cuerpo de la respuesta y lo convierte en objeto de JavaScript', 'Vuelve a hacer el pedido al servidor', 'Muestra el JSON en la consola'], a: 1, e: 'response.json() lee el cuerpo y lo parsea; también devuelve una Promise, por eso lleva await.' },
+  { t: 'mc', q: 'Querés mostrar en pantalla un comentario que escribió un usuario. ¿Qué conviene usar?', o: ['innerHTML, porque respeta el formato', 'textContent, porque no interpreta HTML', 'console.log', 'classList.add'], a: 1, e: 'textContent muestra el texto tal cual; con innerHTML un usuario podría inyectar HTML o scripts.' },
+  { t: 'mc', q: '¿Para qué es especialmente útil <code>console.table</code>?', o: ['Para ver arrays de objetos en filas y columnas', 'Para crear tablas HTML en la página', 'Para mostrar errores en rojo', 'Para medir tiempos'], a: 0, e: 'console.table muestra cada objeto como una fila y cada propiedad como una columna.' },
+  { t: 'vf', q: 'Una variable declarada con <code>let</code> se puede reasignar.', a: true, e: 'Verdadero: esa es justamente la diferencia con const.' },
+  { t: 'vf', q: 'Si un objeto está en un <code>const</code>, no se pueden cambiar sus propiedades.', a: false, e: 'Falso: const impide reasignar la variable, pero el contenido del objeto sí se puede modificar.' },
+  { t: 'vf', q: '<code>===</code> compara el valor y también el tipo.', a: true, e: 'Verdadero: 5 === "5" es false porque uno es número y el otro texto.' },
+  { t: 'vf', q: 'Si llamás dos veces a <code>addEventListener("click", ...)</code> sobre el mismo botón, el segundo reemplaza al primero.', a: false, e: 'Falso: se suman. Al hacer clic se ejecutan las dos funciones.' },
+  { t: 'vf', q: 'JSON permite comentarios y funciones.', a: false, e: 'Falso: JSON solo admite datos (textos, números, booleanos, null, arrays y objetos).' },
+  { t: 'vf', q: '<code>querySelectorAll</code> devuelve una lista que se puede recorrer con <code>forEach</code>.', a: true, e: 'Verdadero: devuelve un NodeList, que tiene forEach y length.' },
+  { t: 'vf', q: 'Si el servidor responde 404, <code>fetch</code> rechaza la promesa automáticamente.', a: false, e: 'Falso: solo se rechaza ante errores de red. Un 404 llega como respuesta normal con ok en false.' },
+  { t: 'txt', q: '¿Qué método convierte un objeto de JavaScript en un texto JSON?', acc: [/^json\.stringify(\(.*\))?;?$/], m: 'JSON.stringify', e: 'JSON.stringify(objeto). El camino inverso es JSON.parse(texto).' },
+  { t: 'txt', q: 'Nombrá un atajo de teclado para abrir la consola en Chrome.', acc: [/f12/, /ctrl\s*\+?\s*shift\s*\+?\s*j/, /cmd\s*\+?\s*(option|opt|alt)\s*\+?\s*j/], m: 'F12, Ctrl+Shift+J (Windows/Linux) o Cmd+Option+J (Mac)', e: 'Cualquiera de esos tres abre las herramientas de desarrollo.' },
+  { t: 'txt', q: 'Escribí la línea que hace que, al hacer clic en <code>boton</code>, se ejecute la función <code>saludar</code>.', acc: [/^boton\.addeventlistener\(\s*["'`]click["'`]\s*,\s*saludar\s*\);?$/], m: 'boton.addEventListener("click", saludar);', e: 'La función va sin paréntesis: si ponés saludar(), se ejecuta en el momento.' },
+  { t: 'txt', q: '¿Qué palabra clave usás dentro de una función <code>async</code> para esperar a que se cumpla una promesa?', acc: [/^await$/], m: 'await', e: 'await pausa esa función hasta que la Promise se resuelve, sin congelar la página.' },
+  { t: 'txt', q: '¿Qué tipo de error aparece si usás una variable que nunca declaraste?', acc: [/^referenceerror$/], m: 'ReferenceError', e: 'ReferenceError: x is not defined. Suele ser un error de tipeo o una variable fuera de su bloque.' }
+];
+const tagName = { mc: 'Opción múltiple', vf: 'Verdadero o falso', txt: 'Respuesta corta' };
+const form = document.getElementById('quiz');
+const render = () => {
+  form.innerHTML = Q.map((q, i) => {
+    let body;
+    if (q.t === 'mc') body = '<div class="opts">' + q.o.map((o, j) => '<label><input type="radio" name="q' + i + '" value="' + j + '"><span>' + esc(o) + '</span></label>').join('') + '</div>';
+    else if (q.t === 'vf') body = '<div class="opts"><label><input type="radio" name="q' + i + '" value="true"><span>Verdadero</span></label><label><input type="radio" name="q' + i + '" value="false"><span>Falso</span></label></div>';
+    else body = '<input type="text" name="q' + i + '" id="q' + i + '" autocomplete="off" spellcheck="false" placeholder="Tu respuesta" aria-label="Respuesta">';
+    return '<div class="q ' + q.t + '" id="pq' + i + '"><div class="qh"><span class="num">' + (i + 1) + '</span><span class="tag">' + tagName[q.t] + '</span></div><p class="qt">' + q.q + '</p>' + body + '<div class="fb"></div></div>';
+  }).join('');
+  document.getElementById('resultado').innerHTML = '';
+};
+render();
+form.addEventListener('submit', e => e.preventDefault());
+document.getElementById('corregir').addEventListener('click', () => {
+  let ok = 0, blank = 0;
+  Q.forEach((q, i) => {
+    const card = document.getElementById('pq' + i);
+    card.classList.remove('ok', 'bad');
+    card.querySelectorAll('label').forEach(l => l.classList.remove('right'));
+    let right = false, answered = true;
+    if (q.t === 'txt') {
+      const v = card.querySelector('input').value.trim().toLowerCase().replace(/\s+/g, ' ');
+      answered = v !== '';
+      right = answered && q.acc.some(r => r.test(v) || r.test(v.replace(/ /g, '')));
+    } else {
+      const sel = card.querySelector('input:checked');
+      answered = !!sel;
+      const correct = q.t === 'mc' ? String(q.a) : String(q.a);
+      right = answered && sel.value === correct;
+      card.querySelectorAll('input').forEach(inp => { if (inp.value === correct) inp.closest('label').classList.add('right'); });
+    }
+    if (!answered) blank++;
+    if (right) ok++;
+    card.classList.add(right ? 'ok' : 'bad');
+    card.querySelector('.fb').innerHTML = '<b>' + (right ? 'Correcto.' : answered ? 'Incorrecto.' : 'Sin responder.') + '</b>' + q.e + (q.t === 'txt' && !right ? ' <br>Respuesta esperada: <code>' + esc(q.m) + '</code>' : '');
+  });
+  const pct = Math.round(ok / Q.length * 100);
+  const msg = pct >= 90 ? '¡Excelente! Dominás los fundamentos. Siguiente paso: armar una mini página que pida datos y los muestre.' : pct >= 70 ? 'Muy bien. Repasá las preguntas marcadas en rojo y volvé a la lección que corresponda.' : pct >= 50 ? 'Vas bien encaminado. Volvé a hacer las tareas de las lecciones donde fallaste y repetí la prueba.' : 'Conviene repasar: rehacé los ejemplos de cada lección modificándolos un poco y volvé a intentar.';
+  document.getElementById('resultado').innerHTML = '<div class="score"><span class="big">' + ok + ' / ' + Q.length + '</span><p><b>' + pct + '%</b>' + (blank ? ' · ' + blank + ' sin responder' : '') + '<br>' + msg + '</p></div>';
+  document.getElementById('resultado').scrollIntoView({ block: 'nearest' });
+});
+document.getElementById('reiniciar').addEventListener('click', () => { render(); document.getElementById('prueba').scrollIntoView(); });
+}
+</script>
+</body>
+</html>
